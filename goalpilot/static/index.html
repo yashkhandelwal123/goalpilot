@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GoalPilot — Turn intent into progress</title>
+    <meta
+      name="description"
+      content="Your local goal execution workbench. Plan, run, review and repeat."
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="GoalPilot home"
+        ><span class="brand-icon">↗</span>goalpilot<span class="version"
+          >alpha</span
+        ></a
+      >
+      <p class="workspace-label">PERSONAL WORKSPACE</p>
+      <button class="nav active" id="workspaceNav">
+        ◈ <span>Workspace</span></button
+      ><button class="nav" id="integrationsNav">
+        ⌘ <span>Integrations</span>
+      </button>
+      <div class="project-heading">
+        <span>YOUR PROJECTS</span
+        ><button id="newSmall" aria-label="New project">＋</button>
+      </div>
+      <div id="projectList"></div>
+      <div class="sidebar-footer">
+        <span class="avatar">P</span>
+        <div>
+          <strong>Personal workspace</strong><small>Local · Single user</small>
+        </div>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div>
+          <span class="muted">Personal workspace</span
+          ><span class="slash">/</span><span id="crumb">Overview</span>
+        </div>
+        <div class="top-actions">
+          <span id="pauseBadge" class="badge">Checking server</span
+          ><button id="authButton" class="text-button">Access token</button>
+        </div>
+      </header>
+      <div id="notice" role="status" aria-live="polite"></div>
+      <div id="screen"></div>
+    </main>
+    <dialog id="newDialog">
+      <form id="newForm">
+        <div class="dialog-heading">
+          <span class="eyebrow">START WITH INTENT</span
+          ><button
+            type="button"
+            id="closeDialog"
+            class="text-button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+        <h2>What do you want to achieve?</h2>
+        <p class="muted">
+          Give GoalPilot an outcome. We’ll turn it into a plan and ask for
+          what’s missing.
+        </p>
+        <label
+          >Workflow<select id="newKind">
+            <option value="auto">Detect from my goal</option>
+            <option value="seo">SEO audit</option>
+            <option value="video">Video script package</option>
+            <option value="custom">Custom brief</option>
+          </select></label
+        ><label
+          >Your goal<textarea
+            id="newGoal"
+            rows="5"
+            required
+            minlength="8"
+            maxlength="4000"
+            placeholder="Audit my website and tell me what to improve first…"
+          ></textarea>
+        </label>
+        <div class="dialog-footer">
+          <small>Nothing is published automatically.</small
+          ><button type="submit" class="primary">Build my workspace ↗</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="tokenDialog">
+      <form id="tokenForm">
+        <h2>Local access token</h2>
+        <p class="muted">
+          Only needed if your server has GOALPILOT_TOKEN configured. Model API
+          keys belong in the server environment, never here.
+        </p>
+        <label
+          >Access token<input
+            id="token"
+            type="password"
+            autocomplete="off" /></label
+        ><button class="primary" type="submit">Unlock workspace</button
+        ><button class="text-button" type="button" id="closeToken">
+          Cancel
+        </button>
+      </form>
+    </dialog>
+  </body>
+</html>
