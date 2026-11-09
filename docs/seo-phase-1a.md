@@ -8,7 +8,7 @@
 4. Run a live task for the read-only diagnosis. Optionally opt into PageSpeed first and configure the server-side API key.
 5. Review/download Markdown or **audit JSON**. Artifacts stay in ignored local runtime storage, not this public repo.
 
-The implementation is on a feature branch stacked on the foundation branch until the foundation PR is merged. No PR is automatically merged or deployed.
+The MVP and Phase 1A are consolidated on `codex/initial-mvp`. Further GoalPilot development is applied directly to that branch without new PRs. This source-code workflow does not enable application deployment or content publishing.
 
 ## Evidence and checks
 

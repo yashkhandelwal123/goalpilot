@@ -10,4 +10,5 @@
 - Reference analysis must lead to original work using permitted assets; do not clone another creator's script or impersonate them.
 - Keep credentials in environment variables in v0.1. Never store provider keys in frontend storage or print them in logs.
 - Tests: `python -m unittest discover -s tests -v`; compile check: `python -m compileall -q goalpilot`.
-- Work on feature branches and use PRs after initial repository bootstrap. Do not copy or modify The Crunch Era repository as part of this independent project.
+- Apply all GoalPilot development changes directly to `codex/initial-mvp`. Do not create additional branches or pull requests unless the owner explicitly changes this instruction. This repository workflow rule does not authorize automatic publication of user content or changes to other repositories.
+- Do not copy or modify The Crunch Era repository as part of this independent project.
