@@ -25,7 +25,7 @@ python -m compileall -q goalpilot
 |---|---|
 | Goal intake | Detects SEO/video intent with simple rules; asks missing questions; supports a custom manual brief |
 | Planning | Editable checklist from workflow templates, not an autonomous general-purpose planner |
-| SEO | Read-only initial-HTML audit of up to ten same-host sitemap pages, robots and sitemap checks; dated evidence and limitations |
+| SEO · Phase 1A | Nested sitemap discovery, up to ten initial-HTML pages, 40 internal-link checks, canonical/redirect checks, structural JSON-LD validation, duplicate metadata, Markdown + JSON evidence |
 | Video script package | Original scripts from supplied source notes via an explicitly configured OpenAI-compatible model; offline template available |
 | Reference content | Accepts a pasted transcript or shot notes as context; does **not** fetch or watch videos |
 | Review | Immutable Markdown drafts, exports and content-hash-bound owner review; review does not publish |
@@ -34,6 +34,14 @@ python -m compileall -q goalpilot
 | Safety | Public-IP-pinned HTTPS crawler, robots policy, bounded responses, PAUSE, origin/Host checks, optional local access token |
 
 **Not implemented:** automated web/SERP research, keyword volumes, GSC/GA4, website modification/PRs, audiovisual analysis, rendering, TTS, social uploads, arbitrary tool execution, multi-user accounts or public hosting. Missing integrations are shown as planned, not simulated successes. No search ranking or revenue result is guaranteed.
+
+## Optional PageSpeed measurement
+
+Set `PAGESPEED_API_KEY` in the server environment with PageSpeed Insights API enabled. In an SEO project, select **Yes — send the website URL to Google PageSpeed**, save the details, then run the live task. This explicitly permits sending that public URL to Google. The choice is saved in the run snapshot and any subsequently approved draft schedule. No key is sent to the browser.
+
+At most two requests are made (mobile/desktop) for the entered URL. Scores, LCP, CLS and TBT are Lighthouse **lab** measurements, not field INP. Missing credentials, null scores, runtime errors or quota failures are reported as unmeasured. Offline demos make no API calls even if a key exists. Never commit actual audit exports or API keys to this public repository.
+
+See [Phase 1A scope and limits](docs/seo-phase-1a.md). Analytics and keyword research remain future milestones.
 
 ## Optional model configuration
 

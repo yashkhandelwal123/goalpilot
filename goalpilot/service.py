@@ -4,7 +4,7 @@ import time
 import uuid
 from pathlib import Path
 from .core import ROOT,Store,UserError,create_project,questions,integrations,digest
-from .workflows import seo,video
+from .workflows import seo,seo_report,render_seo,video
 
 class Service:
     def __init__(self,path=None,root=ROOT):
@@ -23,9 +23,11 @@ class Service:
         self.check();p=self.store.get('projects',id)
         inputs=data.get('inputs',{})
         if not isinstance(inputs,dict):raise UserError('Inputs must be an object')
-        allowed={'website','audience','topic','facts','reference','language','outcome'}
+        allowed={'website','audience','topic','facts','reference','language','outcome','pagespeed'}
         for k,v in inputs.items():
             if k not in allowed or not isinstance(v,str) or len(v)>12000:raise UserError('Invalid input field or input too long')
+        if 'pagespeed' in inputs and inputs['pagespeed'] not in ('yes','no'):
+            raise UserError('PageSpeed choice must be yes or no')
         p['inputs'].update(inputs)
         if 'plan' in data:
             if not isinstance(data['plan'],list) or not 1<=len(data['plan'])<=12 or any(not isinstance(v,str) or not v.strip() or len(v)>300 for v in data['plan']):raise UserError('Plan needs 1–12 short task descriptions')
@@ -89,10 +91,13 @@ class Service:
         try:
             self.check();p=job['project_snapshot']
             event=lambda action,status:self.store.event(p['id'],action,status)
-            if p['kind']=='seo':text=seo(p,job['demo'],self.check,event)
+            report=None
+            if p['kind']=='seo':
+                report=seo_report(p,job['demo'],self.check,event)
+                text=render_seo(report)
             elif p['kind']=='video':text=video(p,job['demo'],job['allow_model'],self.check,event)
             else:text='# Manual project brief\n\n'+json.dumps({'goal':p['goal'],'inputs':p['inputs'],'plan':p['plan']},indent=2)+'\n\nNo general-purpose tool executor is implemented in v0.1.'
-            self.check();self.store.artifact(p['id'],text,job['demo']);self.store.finish(job,'done')
+            self.check();self.store.artifact(p['id'],text,job['demo'],report=report);self.store.finish(job,'done')
         except UserError as e:self.store.finish(job,'blocked',str(e))
         except Exception:self.store.finish(job,'failed','Run failed; details redacted. Check permissions, network and configuration.')
         return True

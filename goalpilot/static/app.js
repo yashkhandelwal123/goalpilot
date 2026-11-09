@@ -359,6 +359,29 @@ function projectView(screen, p) {
     controls[key] = input;
     add(intake, add(el("label", {}, label), input));
   }
+  if (p.kind === "seo") {
+    const speed = el("select");
+    add(
+      speed,
+      el("option", { value: "no" }, "No — local crawler only"),
+      el(
+        "option",
+        { value: "yes" },
+        "Yes — send the website URL to Google PageSpeed",
+      ),
+    );
+    speed.value = p.inputs.pagespeed || "no";
+    controls.pagespeed = speed;
+    add(
+      intake,
+      add(el("label", {}, "Optional page-speed measurement"), speed),
+      el(
+        "p",
+        { class: "workflow-note" },
+        "Requires PAGESPEED_API_KEY on the server. Two requests: mobile and desktop. This choice also applies to any draft schedule you approve.",
+      ),
+    );
+  }
   const plan = el("textarea", { rows: 5, maxlength: 3600 });
   plan.value = p.plan.join("\n");
   add(intake, add(el("label", {}, "Task plan — one step per line"), plan));
@@ -392,7 +415,7 @@ function projectView(screen, p) {
       { class: "workflow-note" },
       p.kind === "video"
         ? "Live generation sends your supplied notes to the configured model provider. Research, video analysis and rendering are not implemented yet."
-        : "Live runs inspect permitted public pages only. They do not change websites, measure rankings or run analytics.",
+        : "Live runs inspect permitted public pages only. They include bounded sitemap/link/canonical/schema checks and optional PageSpeed. They do not change websites, measure rankings or run analytics.",
     ),
   );
   const consent = el("input", { type: "checkbox" });
@@ -492,6 +515,25 @@ function projectView(screen, p) {
         setTimeout(() => URL.revokeObjectURL(a.href), 500);
       }),
     );
+    if (artifact.report)
+      add(
+        acts,
+        button("Download audit JSON", async () => {
+          const data = await api("artifacts/" + artifact.id + "/report");
+          const a = el("a", {
+            href: URL.createObjectURL(
+              new Blob([JSON.stringify(data, null, 2)], {
+                type: "application/json",
+              }),
+            ),
+            download: "goalpilot-audit-" + artifact.id.slice(0, 8) + ".json",
+          });
+          document.body.append(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 500);
+        }),
+      );
     if (!artifact.demo && !artifact.approval)
       add(
         acts,
@@ -612,9 +654,10 @@ function integrationsView(screen) {
     integrationCard({
       name: "Public HTTPS crawler",
       status: "available",
-      purpose: "Bounded public website audits; no credentials needed",
+      purpose:
+        "Nested-sitemap discovery, links, canonicals and schema checks; no crawler credentials needed",
       setup:
-        "Respects robots.txt, validates public addresses, blocks off-site redirects and limits crawls to ten pages.",
+        "Respects robots.txt, validates public addresses, blocks off-site redirects and limits HTML audits to ten pages, sitemap fetches to six and link checks to forty.",
     }),
   );
   box.append(
@@ -630,6 +673,17 @@ function integrationsView(screen) {
           " · model: " +
           state.status.model
         : "Set LLM_BASE_URL, LLM_MODEL, LLM_API_KEY in the server environment. No provider calls occur until a live video run is explicitly approved.",
+    }),
+  );
+  box.append(
+    integrationCard({
+      name: "Google PageSpeed Insights",
+      status: state.status.pagespeed_configured
+        ? "configured"
+        : "needs_configuration",
+      purpose: "Optional mobile and desktop lab measurements for SEO projects",
+      setup:
+        "Set PAGESPEED_API_KEY on the server, then opt in in each project's saved details. Sends the public URL to Google; demo runs make no requests.",
     }),
   );
   screen.append(box);

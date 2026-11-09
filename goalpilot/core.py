@@ -74,8 +74,9 @@ class Store:
         # A paid provider request may have completed before a crash. Never auto-retry.
         for job in self.all('jobs'):
             if job['status']=='running': self.finish(job,'interrupted','Server restarted; review before retrying')
-    def artifact(self, project_id, text, demo=False):
+    def artifact(self, project_id, text, demo=False, report=None):
         item={'id':uuid.uuid4().hex,'project_id':project_id,'text':text,'sha256':digest(text),'created_at':time.time(),'demo':demo,'approval':None}
+        if report is not None: item['report'] = report
         self.put('artifacts',item); self.event(project_id,'draft created','fixture' if demo else 'review required'); return item
     def approve(self, id, expected_hash):
         item=self.get('artifacts',id)
@@ -120,7 +121,8 @@ def questions(project):
 def integrations(project):
     if project['kind']=='custom': return [{'name':'Manual brief','status':'available','purpose':'Organise a custom goal without external requests','required_now':True,'setup':'No general-purpose executor is implemented in v0.1.'}]
     if project['kind']=='seo': return [
-        {'name':'Public site crawler','status':'available','purpose':'Read-only HTML, robots and sitemap checks','required_now':True},
+        {'name':'Public site crawler','status':'available','purpose':'Read-only HTML, nested sitemaps, internal links, canonicals and schema checks','required_now':True},
+        {'name':'PageSpeed Insights','status':'configured' if os.environ.get('PAGESPEED_API_KEY') else 'needs_configuration','purpose':'Optional Google mobile/desktop lab measurements','required_now':False,'setup':'Set PAGESPEED_API_KEY in the server environment, then opt in per project to sending its URL to Google.'},
         {'name':'Search Console + GA4','status':'planned','purpose':'Search and sales measurement; reporting-only OAuth scopes','required_now':False,'setup':'Analytics adapters are not implemented in v0.1; never treat missing metrics as zero'},
         {'name':'Repository access','status':'planned','purpose':'Prepare website changes as reviewable PRs','required_now':False}]
     return [{'name':'OpenAI-compatible model','status':'configured' if model_ready() else 'needs_configuration','purpose':'Generate an original video script from supplied notes','required_now':True,

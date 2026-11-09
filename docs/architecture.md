@@ -12,7 +12,7 @@ A single worker polls a SQLite queue. Approved schedules enqueue only draft jobs
 
 ## Network boundary
 
-Public website fetching permits HTTPS:443 only, rejects credentials, validates all DNS addresses as global and pins the TLS connection to a validated address while retaining hostname certificate validation. Every same-host redirect is checked; off-host redirects require the owner to supply the final URL. Responses are bounded to 512 KB. Robots failure stops crawling. At most ten sitemap page URLs are inspected. This is not a full crawler or JS renderer.
+Public website fetching permits HTTPS:443 only, rejects credentials, validates all DNS addresses as global and pins the TLS connection to a validated address while retaining hostname certificate validation. Every same-host redirect is checked; off-host redirects require the owner to supply the final URL. Responses are bounded to 512 KB. Robots failure stops crawling. Phase 1A inspects at most ten same-host pages discovered from the entry URL, nested XML sitemaps and internal anchors. It follows at most six sitemaps and checks at most forty distinct internal links. Robots and action-route restrictions are reapplied before each redirect. Shared caching avoids repeated fetches. All phases share an 80-logical-site-fetch / 120-second boundary; each fetch can follow at most four HTTP attempts. Budgets and skipped URLs are recorded as partial coverage, never a passing result. The time boundary is checked between actions, so an already in-flight request may complete afterwards. This is not a full crawler or JS renderer.
 
 The model adapter accepts only a server-operator-configured HTTPS base URL. It never follows redirects and never accepts an endpoint from a web page or model output. It sends user-approved source notes to that destination once, with a completion-token cap. Provider compatibility and fees remain the operator's responsibility. Additional providers should implement a separate adapter with the same consent and logging contract.
 
@@ -24,7 +24,7 @@ The model adapter accepts only a server-operator-configured HTTPS base URL. It n
 4. Verify access without implying it implements an unsupported capability.
 5. Request exact-task approval for paid actions; content publication needs a separate gate.
 
-In v0.1, only the public crawler and Chat Completions model adapter execute external requests. GSC, GA4, search, audiovisual analysis, TTS, rendering, GitHub and social publishing are future adapters, explicitly marked planned.
+With Phase 1A, the public crawler, optional per-project Google PageSpeed client and Chat Completions model adapter execute external requests. PageSpeed makes at most two one-shot HTTPS requests, rejects redirects, uses a server-side key, and logs neither the key nor its request URL. It is disabled in demo mode. GSC, GA4, search, audiovisual analysis, TTS, rendering, GitHub and social publishing are future adapters, explicitly marked planned.
 
 ## Security limits
 

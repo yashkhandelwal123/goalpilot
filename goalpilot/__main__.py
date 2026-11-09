@@ -39,7 +39,7 @@ def handler(service,token=''):
                     if not isinstance(body,dict):raise UserError('JSON object required')
                 if path=='/api/status' and method=='GET':
                     from urllib.parse import urlsplit as split
-                    return self.reply(200,{'paused':(service.root/'PAUSE').exists(),'model_configured':model_ready(),
+                    return self.reply(200,{'paused':(service.root/'PAUSE').exists(),'model_configured':model_ready(),'pagespeed_configured':bool(os.environ.get('PAGESPEED_API_KEY')),
                                            'provider_host':split(os.environ.get('LLM_BASE_URL','')).hostname,
                                            'model':os.environ.get('LLM_MODEL'),'version':'0.1.0','publication_enabled':False})
                 if path=='/api/projects':
@@ -55,6 +55,10 @@ def handler(service,token=''):
                         if parts[3]=='runs':return self.reply(202,service.run(id,body))
                         if parts[3]=='schedules':return self.reply(201,service.schedule(id,body))
                 if len(parts)==4 and parts[:2]==['api','artifacts']:
+                    if parts[3]=='report' and method=='GET':
+                        item=service.store.get('artifacts',parts[2])
+                        if 'report' not in item: raise UserError('No structured SEO report for this artifact')
+                        return self.reply(200,item['report'])
                     if parts[3]=='approve' and method=='POST':return self.reply(200,service.approve(parts[2],body))
                     if parts[3]=='export' and method=='GET':return self.reply(200,service.store.get('artifacts',parts[2])['text'],'text/markdown')
                 if len(parts)==4 and parts[:2]==['api','schedules'] and parts[3]=='disable' and method=='POST':return self.reply(200,service.disable_schedule(parts[2]))

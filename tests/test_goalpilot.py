@@ -126,9 +126,9 @@ class GoalPilotTests(unittest.TestCase):
             'https://example.com/':{'status':200,'text':'<title>Home</title><h1>Home</h1><a href="/page">Page</a>','content_type':'text/html'},
             'https://example.com/page':{'status':200,'text':'<title>Page</title><h1>Page</h1>','content_type':'text/html'}}
         fetched=[]
-        def fixture(url,*args):
+        def fixture(url,*args,**kwargs):
             fetched.append(url);return {**pages[url],'url':url}
-        with patch('goalpilot.workflows.fetch',side_effect=fixture),patch('goalpilot.workflows.time.sleep'):
+        with patch('goalpilot.workflows.fetch',side_effect=fixture),patch('goalpilot.seo.time.sleep'):
             text=seo(project,False,lambda:None,lambda a,s:None)
         self.assertIn('Missing description',text);self.assertIn('https://example.com/page',text)
         self.assertFalse(any('evil' in url or 'logout' in url for url in fetched))
@@ -140,12 +140,12 @@ class GoalPilotTests(unittest.TestCase):
 
     def test_seo_ten_page_cap_is_explicit(self):
         urls=['https://example.com/page'+str(i) for i in range(15)]
-        def fixture(url,*args):
+        def fixture(url,*args,**kwargs):
             if url.endswith('robots.txt'):text='User-agent: *\nAllow: /';kind='text/plain'
             elif url.endswith('sitemap.xml'):text='<urlset>'+''.join('<url><loc>'+u+'</loc></url>' for u in urls)+'</urlset>';kind='application/xml'
             else:text='<title>Example</title><h1>Example</h1>';kind='text/html'
             return {'url':url,'status':200,'text':text,'content_type':kind}
-        with patch('goalpilot.workflows.fetch',side_effect=fixture),patch('goalpilot.workflows.time.sleep'):
+        with patch('goalpilot.workflows.fetch',side_effect=fixture),patch('goalpilot.seo.time.sleep'):
             text=seo(self.project('seo'),False,lambda:None,lambda a,s:None)
         self.assertIn('Ten-page cap reached',text);self.assertEqual(text.count('### https://'),10)
 
@@ -188,5 +188,16 @@ class HTTPTests(unittest.TestCase):
                 if tag=='option':self.values.append(dict(attrs).get('value'))
         parser=Options();parser.feed((ROOT/'goalpilot/static/index.html').read_text())
         self.assertEqual(parser.values,['auto','seo','video','custom'])
+
+    def test_seo_json_export_and_legacy_artifact_error(self):
+        _,p=self.request('/api/projects',{'goal':'Audit website SEO','kind':'seo'})
+        self.app.update(p['id'],{'inputs':{'website':'https://example.com','audience':'Readers'}})
+        self.app.run(p['id'],{'demo':True});self.app.process_one()
+        item=self.app.view(p['id'])['artifacts'][0]
+        status,report=self.request('/api/artifacts/'+item['id']+'/report')
+        self.assertEqual(status,200);self.assertTrue(report['demo']);self.assertEqual(report['version'],'1A')
+        old=self.app.store.artifact(p['id'],'Legacy draft')
+        with self.assertRaises(urllib.error.HTTPError) as error:self.request('/api/artifacts/'+old['id']+'/report')
+        self.assertEqual(error.exception.code,400)
 
 if __name__=='__main__':unittest.main()
