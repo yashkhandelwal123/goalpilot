@@ -1,0 +1,13 @@
+{
+  "brand": "Example Snacks",
+  "audience": "Adults in India looking for office snack ideas",
+  "topic": "Read a snack ingredient list before choosing",
+  "language": "English",
+  "cta": "Explore https://example.com/products",
+  "facts": [
+    {"id": "fact-1", "text": "This fictional example product is roasted and salted chickpeas.", "source": "Synthetic pack-label fixture; replace with a real current label"},
+    {"id": "fact-2", "text": "Its fictional ingredient list is chickpeas and salt.", "source": "Synthetic fixture only"}
+  ],
+  "research_urls": [],
+  "assets": []
+}

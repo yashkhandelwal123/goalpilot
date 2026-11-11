@@ -33,7 +33,17 @@ python -m compileall -q goalpilot
 | Persistence | SQLite projects, queued runs, drafts, schedules and activity history |
 | Safety | Public-IP-pinned HTTPS crawler, robots policy, bounded responses, PAUSE, origin/Host checks, optional local access token |
 
-**Not implemented:** automated web/SERP research, keyword volumes, GSC/GA4, website modification/PRs, audiovisual analysis, rendering, TTS, social uploads, arbitrary tool execution, multi-user accounts or public hosting. Missing integrations are shown as planned, not simulated successes. No search ranking or revenue result is guaranteed.
+**Not implemented:** automated discovery/SERP research, keyword volumes, GSC/GA4, website modification/PRs, audiovisual analysis, social uploads, arbitrary tool execution, multi-user accounts or public hosting. Missing integrations are shown as planned, not simulated successes. No search ranking or revenue result is guaranteed.
+
+## Content creator agent
+
+A separate CLI now prepares evidence and creative packages, provides editable Canva/Adobe design handoffs, calls a configured speech provider with exact-request consent, and renders voiced photo Reels with FFmpeg. It is not wired into the web UI or draft scheduler. Design connector actions remain assistant/manual handoffs; competitor research reads only explicitly supplied public page metadata. No publishing or voice cloning.
+
+```bash
+python -m goalpilot.creator prepare examples/creator-brief.json --out runtime/creator/first-draft
+```
+
+See [setup, voice configuration and Reel workflow](docs/creator-agent.md). The example is fictional; keep actual business briefs and media under ignored `runtime/`.
 
 ## Optional PageSpeed measurement
 
